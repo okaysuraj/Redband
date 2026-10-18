@@ -1,153 +1,261 @@
-import React, { useState } from "react";
+// Contact links, dispatch subscription, and published policy dialogs.
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { subscribeDispatch } from "../api/client";
+import useModalFocus from "./useModalFocus";
 
-export default function Footer({ onOpenBooking }) {
+function LegalDialog({ content, onClose }) {
+  const ref = useRef(null);
+  useModalFocus(ref, onClose);
+  return createPortal(
+    <div
+      className="modal-backdrop"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        ref={ref}
+        className="booking-modal-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="legal-title"
+        tabIndex={-1}
+      >
+        <div className="modal-top-bar hairline-b">
+          <h2 className="modal-heading" id="legal-title">
+            {content.title}
+          </h2>
+          <button
+            className="modal-close-btn"
+            onClick={onClose}
+            aria-label="Close document"
+          >
+            &times;
+          </button>
+        </div>
+        <div className="modal-body-scroll legal-body">
+          {Array.isArray(content.body) ? (
+            content.body.map((paragraph, index) => (
+              <p key={index}>{paragraph}</p>
+            ))
+          ) : (
+            <p>{content.body}</p>
+          )}
+        </div>
+      </section>
+    </div>,
+    document.body,
+  );
+}
+export default function Footer({
+  brand,
+  content,
+  legal,
+  treatments = [],
+  locations = [],
+  favorites = [],
+  onOpenBooking,
+  bookingAvailable,
+  onManageBooking,
+}) {
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
-
-  const handleSubscribe = (e) => {
-    e.preventDefault();
-    if (email) {
-      setSubscribed(true);
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
+  const [document, setDocument] = useState(null);
+  const closeDocument = useCallback(() => setDocument(null), []);
+  const controller = useRef(null);
+  const mounted = useRef(true);
+  const submitting = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      controller.current?.abort();
+    };
+  }, []);
+  async function subscribe(event) {
+    event.preventDefault();
+    if (submitting.current) return;
+    submitting.current = true;
+    setPending(true);
+    setError("");
+    controller.current = new AbortController();
+    try {
+      await subscribeDispatch(email.trim(), {
+        signal: controller.current.signal,
+      });
+      if (mounted.current) {
+        setSubscribed(true);
+        setEmail("");
+      }
+    } catch (failure) {
+      if (mounted.current && failure.name !== "AbortError")
+        setError(failure.message);
+    } finally {
+      submitting.current = false;
+      if (mounted.current) setPending(false);
     }
-  };
-
+  }
   return (
-    <footer className="site-footer" role="contentinfo">
+    <footer className="site-footer">
       <div className="editorial-shell">
-        {/* Top Dispatch Banner */}
-        <div className="footer-dispatch-row hairline-b">
-          <div className="dispatch-copy">
-            <span className="eyebrow">
-              <span className="eyebrow-accent">●</span> The Atelier Dispatch
-            </span>
-            <h3 className="dispatch-title">
-              Monthly treatises on hair biology, scalp micro-climates, and unhurried design.
-            </h3>
+        {content?.dispatch_title && (
+          <div className="footer-dispatch-row hairline-b">
+            <div className="dispatch-copy">
+              <h2 className="dispatch-title">{content.dispatch_title}</h2>
+              {content.dispatch_description && (
+                <p>{content.dispatch_description}</p>
+              )}
+            </div>
+            <div className="dispatch-form-col">
+              {subscribed ? (
+                <p className="dispatch-success" role="status">
+                  Your subscription has been saved.
+                </p>
+              ) : (
+                <form
+                  className="dispatch-form"
+                  aria-label="Subscribe to dispatch"
+                  onSubmit={subscribe}
+                >
+                  <label className="sr-only" htmlFor="dispatch-email">
+                    Email address for dispatch
+                  </label>
+                  <input
+                    className="dispatch-input"
+                    id="dispatch-email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    maxLength={255}
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    disabled={pending}
+                  />
+                  <button
+                    type="submit"
+                    className="btn-ink dispatch-submit-btn"
+                    disabled={pending}
+                  >
+                    {pending ? "Subscribing..." : "Join dispatch"}
+                  </button>
+                </form>
+              )}
+              {error && (
+                <p className="booking-error-banner" role="alert">
+                  {error}
+                </p>
+              )}
+              {content.dispatch_fineprint && (
+                <p className="dispatch-fineprint">
+                  {content.dispatch_fineprint}
+                </p>
+              )}
+            </div>
           </div>
-
-          <div className="dispatch-form-col">
-            {subscribed ? (
-              <div className="dispatch-success" role="status">
-                <span className="success-dot">✓</span>
-                <span>Thank you. Your address is entered into our quarterly journal list.</span>
-              </div>
-            ) : (
-              <form onSubmit={handleSubscribe} className="dispatch-form" aria-label="Subscribe to Atelier Dispatch">
-                <input
-                  type="email"
-                  required
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="dispatch-input"
-                  aria-label="Email address for dispatch"
-                />
-                <button type="submit" className="btn-ink dispatch-submit-btn">
-                  <span>Join Dispatch</span>
-                  <span aria-hidden="true">→</span>
-                </button>
-              </form>
-            )}
-            <span className="dispatch-fineprint">
-              We send no promotional spam or seasonal sales. Strictly editorial studies and release notices.
-            </span>
-          </div>
-        </div>
-
-        {/* Main 4-column directory */}
+        )}
         <div className="footer-directory-grid hairline-b">
-          {/* Col 1: Brand & Ethos */}
           <div className="dir-col brand-col">
             <div className="footer-brand-lockup">
-              <span className="footer-brand-name">Redband</span>
-              <span className="footer-brand-sub">Atelier & Apothecary</span>
+              <span className="footer-brand-name">
+                {brand?.name || "Redband"}
+              </span>
+              {brand?.subtitle && (
+                <span className="footer-brand-sub">{brand.subtitle}</span>
+              )}
             </div>
-            <p className="dir-ethos">
-              A private restorative hair clinic and bespoke cutting room. We diagnose head shape, 
-              follicle density, and texture before touching shears—infusing cold-pressed botanical 
-              elixirs in single-chair acoustic silence.
-            </p>
-            <div className="dir-standards">
-              <span className="standards-badge">Bespoke Protocol No. 188</span>
-              <span className="standards-badge">Cruelty Free & Bio-Lipid</span>
-            </div>
+            {brand?.description && (
+              <p className="dir-ethos">{brand.description}</p>
+            )}
           </div>
-
-          {/* Col 2: Sanctuaries */}
           <div className="dir-col hairline-l">
-            <span className="dir-header">Sanctuaries</span>
-            <div className="dir-location-block">
-              <strong className="dir-loc-name">NoHo Atelier</strong>
-              <p className="dir-loc-addr">312 Great Jones Street, Suite 3B<br />New York, NY 10012</p>
-              <a href="tel:+12125550198" className="dir-link">+1 (212) 555-0198</a>
-              <span className="dir-hours">Wed – Sun: 09:00 – 19:00</span>
-            </div>
-
-            <div className="dir-location-block dir-loc-second hairline-t">
-              <strong className="dir-loc-name">Mayfair Atelier</strong>
-              <p className="dir-loc-addr">14 South Audley St, Floor 2<br />London W1K 1HN</p>
-              <a href="tel:+442079460912" className="dir-link">+44 (0) 20 7946 0912</a>
-              <span className="dir-hours">Tue – Sat: 10:00 – 19:30</span>
-            </div>
+            <span className="dir-header">Studios</span>
+            {locations.map((location) => (
+              <div className="dir-location-block" key={location.id}>
+                <strong className="dir-loc-name">
+                  {location.neighborhood} · {location.city}
+                </strong>
+                <p className="dir-loc-addr">{location.address}</p>
+                {location.phone && (
+                  <a
+                    className="dir-link"
+                    href={`tel:${location.phone.replace(/[^0-9+]/g, "")}`}
+                  >
+                    {location.phone}
+                  </a>
+                )}
+                <span className="dir-hours">{location.hours}</span>
+              </div>
+            ))}
           </div>
-
-          {/* Col 3: Disciplines */}
           <div className="dir-col hairline-l">
-            <span className="dir-header">Disciplines</span>
+            <span className="dir-header">Treatments and additions</span>
             <ul className="dir-nav-list">
-              <li><a href="#treatments" className="dir-nav-link">The Architectural Cut (75m)</a></li>
-              <li><a href="#treatments" className="dir-nav-link">Botanical Scalp Detox (60m)</a></li>
-              <li><a href="#treatments" className="dir-nav-link">Natural Texture Mastery (90m)</a></li>
-              <li><a href="#treatments" className="dir-nav-link">Atelier Restoration Suite (115m)</a></li>
-              <li><a href="#favorites" className="dir-nav-link">Occipital Tension Release</a></li>
-              <li><a href="#favorites" className="dir-nav-link">Wild Hinoki Scalp Infusion</a></li>
-              <li><a href="#favorites" className="dir-nav-link">Silent Chair Option</a></li>
+              {treatments.map((item) => (
+                <li key={item.id}>
+                  <a href="#treatments" className="dir-nav-link">
+                    {item.title} · {item.duration} · {item.price}
+                  </a>
+                </li>
+              ))}
+              {favorites.map((item) => (
+                <li key={item.code}>
+                  <a href="#favorites" className="dir-nav-link">
+                    {item.name} · {item.duration} · {item.price}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
-
-          {/* Col 4: Quiet Protocols & Booking */}
           <div className="dir-col hairline-l">
-            <span className="dir-header">Protocol & Reserving</span>
+            <span className="dir-header">Reservations</span>
             <div className="dir-protocol-box">
-              <div className="protocol-line">
-                <span className="protocol-title">Acoustic Silence</span>
-                <p className="protocol-desc">Every suite is individual. You may request silent service with zero polite small talk at no cost.</p>
-              </div>
-              <div className="protocol-line hairline-t">
-                <span className="protocol-title">Rescheduling</span>
-                <p className="protocol-desc">Full complimentary modification up to 24 hours prior to your scheduled consultation.</p>
-              </div>
+              {(content?.protocols || []).map((item, index) => (
+                <div className="protocol-line" key={index}>
+                  <strong className="protocol-title">{item.title}</strong>
+                  <p className="protocol-desc">{item.description}</p>
+                </div>
+              ))}
               <button
-                type="button"
                 className="btn-ink footer-reserve-btn"
-                onClick={() => onOpenBooking()}
+                onClick={onOpenBooking}
+                disabled={!bookingAvailable}
               >
-                <span>Reserve a Suite</span>
-                <span aria-hidden="true">→</span>
+                Reserve a Chair
+              </button>
+              <button className="btn-outline" onClick={onManageBooking}>
+                Manage booking
               </button>
             </div>
           </div>
         </div>
-
-        {/* Sub-footer Copyright & Legal */}
         <div className="footer-legal-bar">
-          <div className="legal-left">
-            <span>© {new Date().getFullYear()} Redband Atelier LLC. All rights reserved.</span>
-            <span className="legal-sep">·</span>
-            <span>Designed under Editorial Service Booking Standards</span>
-          </div>
-
+          <span>
+            {content?.copyright ||
+              `Copyright ${new Date().getFullYear()} ${brand?.name || "Redband"}`}
+          </span>
           <div className="legal-right">
-            <a href="#top" className="legal-link">Privacy Policy</a>
-            <a href="#top" className="legal-link">Accessibility</a>
-            <a href="#top" className="legal-link">Terms of Service</a>
-            <a href="#top" className="back-to-top-link" aria-label="Back to top of page">
-              <span>Top</span>
-              <span aria-hidden="true">↑</span>
+            {["privacy", "accessibility", "terms"].map((key) =>
+              legal?.[key]?.title && legal[key].body ? (
+                <button
+                  className="legal-link"
+                  key={key}
+                  onClick={() => setDocument(legal[key])}
+                >
+                  {legal[key].title}
+                </button>
+              ) : null,
+            )}
+            <a href="#top" className="back-to-top-link">
+              Back to top
             </a>
           </div>
         </div>
       </div>
+      {document && <LegalDialog content={document} onClose={closeDocument} />}
     </footer>
   );
 }

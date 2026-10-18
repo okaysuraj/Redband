@@ -1,62 +1,108 @@
+"""Redband API: catalog, shared content, and authenticated reservations.
+
+From backend/: alembic upgrade head, then uvicorn app.main:app --reload.
+Load approved catalog content explicitly with python -m app.import_data <file>.
 """
-Redband Atelier & Apothecary — FastAPI Backend
-"""
+
+import os
 from contextlib import asynccontextmanager
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
+from starlette.responses import JSONResponse
 
-from app.database import init_db
-from app.routers import treatments, locations, practitioners, availability, bookings, dispatch
+from app.database import APP_ENV, engine, init_db
+from app.middleware import RequestGuardMiddleware
+from app.routers import (
+    availability,
+    bookings,
+    content,
+    dispatch,
+    health,
+    locations,
+    practitioners,
+    treatments,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Create tables and seed data on startup."""
+    if APP_ENV == "production" and len(os.getenv("ADMIN_API_KEY", "")) < 32:
+        raise RuntimeError(
+            "Production ADMIN_API_KEY must contain at least 32 characters"
+        )
     await init_db()
     yield
+    await engine.dispose()
 
 
 app = FastAPI(
     title="Redband Atelier API",
-    description="Private restorative hair clinic and bespoke cutting room — reservation and data API.",
-    version="1.0.0",
+    version="2.0.0",
     lifespan=lifespan,
+    docs_url=None if APP_ENV == "production" else "/docs",
+    redoc_url=None if APP_ENV == "production" else "/redoc",
+    openapi_url=None if APP_ENV == "production" else "/openapi.json",
 )
 
-# CORS — allow frontend and mobile dev origins
+origins = [
+    x.strip().rstrip("/") for x in os.getenv("CORS_ORIGINS", "").split(",") if x.strip()
+]
+if not origins and APP_ENV != "production":
+    origins = [
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:8081",
+        "http://127.0.0.1:8081",
+    ]
+if APP_ENV == "production" and (
+    not origins
+    or any(
+        urlsplit(x).scheme != "https" or not urlsplit(x).netloc or urlsplit(x).path
+        for x in origins
+    )
+):
+    raise RuntimeError("Production CORS_ORIGINS requires explicit HTTPS origins")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",   # Vite frontend
-        "http://localhost:8081",   # Expo mobile web
-        "http://localhost:19006",  # Expo web
-        "*",                      # Mobile native has no origin header
+    allow_origins=origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "X-Booking-Token",
+        "Idempotency-Key",
     ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    max_age=600,
 )
 
-# Mount routers
-app.include_router(treatments.router)
-app.include_router(locations.router)
-app.include_router(practitioners.router)
-app.include_router(availability.router)
-app.include_router(bookings.router)
-app.include_router(dispatch.router)
+app.add_middleware(RequestGuardMiddleware)
+for router in (
+    health.router,
+    treatments.router,
+    locations.router,
+    practitioners.router,
+    availability.router,
+    bookings.router,
+    bookings.admin_router,
+    dispatch.router,
+    content.router,
+):
+    app.include_router(router)
 
 
-@app.get("/", tags=["Root"])
+@app.exception_handler(SQLAlchemyError)
+async def database_error(request, exc):
+    # Never expose SQL, credentials or customer values in error payloads.
+    return JSONResponse(
+        {"detail": "The service is temporarily unavailable. Please try again."},
+        status_code=503,
+    )
+
+
+@app.get("/")
 async def root():
-    return {
-        "service": "Redband Atelier API",
-        "version": "1.0.0",
-        "status": "operational",
-        "documentation": "/docs",
-    }
-
-
-@app.get("/health", tags=["Root"])
-async def health_check():
-    return {"status": "healthy"}
+    return {"service": "Redband Atelier API", "version": "2.0.0"}

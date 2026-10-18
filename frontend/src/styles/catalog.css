@@ -1,0 +1,342 @@
+/* --------------------------------------------------------------------------
+   Signature Favorites (Midnight Obsidian Apothecary Chapter)
+   -------------------------------------------------------------------------- */
+.favorites-chapter {
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(158, 38, 31, 0.14) 0%,
+      rgba(18, 17, 15, 0.98) 60%
+    ),
+    #12110f;
+  color: var(--paper);
+}
+
+.dark-shell {
+  background: transparent;
+  border-left-color: var(--chapter-dark-line);
+  border-right-color: var(--chapter-dark-line);
+}
+
+.hairline-l-dark {
+  border-left: 1px solid var(--chapter-dark-line);
+}
+
+.favorites-header {
+  padding: 64px 40px 48px 40px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 36px;
+}
+
+.dark-eyebrow {
+  color: var(--chapter-dark-muted);
+}
+
+.favorites-heading {
+  font-size: clamp(34px, 3.4vw, 50px);
+  color: var(--paper);
+  margin-top: 14px;
+}
+
+.favorites-lead {
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--chapter-dark-muted);
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid var(--chapter-dark-line);
+}
+
+.favorite-card {
+  padding: 40px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  background-color: var(--glass-dark-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition:
+    color 240ms var(--ease-snappy),
+    background-color 240ms var(--ease-snappy),
+    border-color 240ms var(--ease-snappy),
+    opacity 240ms var(--ease-snappy),
+    transform 240ms var(--ease-snappy);
+}
+
+.favorite-card:hover {
+  background-color: rgba(34, 31, 27, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 16px 36px rgba(0, 0, 0, 0.45);
+}
+
+.card-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-code {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #ff8e84;
+  font-weight: 700;
+}
+
+.card-badge {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  background: rgba(247, 244, 238, 0.08);
+  border: 1px solid var(--chapter-dark-line);
+  color: var(--paper);
+  border-radius: 9999px;
+}
+
+.card-middle {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.card-name {
+  font-size: 25px;
+  line-height: 1.2;
+  color: var(--paper);
+}
+
+.card-detail {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--chapter-dark-muted);
+}
+
+.card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 24px;
+  border-top: 1px solid var(--chapter-dark-line);
+}
+
+.card-pricing {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.card-price {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--paper);
+}
+
+.card-duration {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--chapter-dark-muted);
+}
+
+.card-select-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--paper);
+  border: 1px solid var(--chapter-dark-line);
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    opacity 180ms ease,
+    transform 180ms ease;
+}
+
+.card-select-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(158, 38, 31, 0.35);
+  transform: translateY(-1px);
+}
+
+.card-select-btn:active {
+  transform: scale(0.97);
+}
+
+/* --------------------------------------------------------------------------
+   Studio Locations Section
+   -------------------------------------------------------------------------- */
+.locations-section {
+  background-color: var(--paper);
+}
+
+.locations-header {
+  padding: 64px 40px 44px 40px;
+  max-width: 740px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.locations-heading {
+  font-size: clamp(34px, 3.4vw, 50px);
+}
+
+.locations-lead {
+  font-size: 16.5px;
+  color: var(--ink-secondary);
+  line-height: 1.65;
+}
+
+.locations-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.location-card {
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 36px;
+  background-color: var(--paper);
+  transition:
+    color 220ms ease,
+    background-color 220ms ease,
+    border-color 220ms ease,
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.location-card.is-active-location {
+  background-color: var(--paper-card);
+  box-shadow: inset 0 0 0 1px var(--accent-border);
+}
+
+.loc-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.loc-neighborhood {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.loc-city-name {
+  font-size: 32px;
+  line-height: 1.15;
+  margin-top: 5px;
+}
+
+.loc-status-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.loc-current-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.loc-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: var(--glass-chip);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--line);
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--ink-secondary);
+}
+
+.loc-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.loc-info-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.info-value {
+  font-size: 14.5px;
+  color: var(--ink);
+}
+
+.info-sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.loc-phone-link {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 150ms ease;
+}
+
+.loc-phone-link:hover {
+  color: var(--accent-hover);
+}
+
+.loc-card-foot {
+  padding-top: 28px;
+}
+
+.loc-book-btn {
+  width: 100%;
+  border-radius: 9999px;
+}

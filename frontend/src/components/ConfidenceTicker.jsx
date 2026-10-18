@@ -1,27 +1,20 @@
+// Display published studio principles as a static, readable list.
 import React from "react";
-
-export default function ConfidenceTicker() {
-  const statements = [
-    "ARCHITECTURAL DRY SCISSOR CUTTING",
-    "OZONE VAPOR SCALP PURIFICATION",
-    "SINGLE-CHAIR ACOUSTIC ISOLATION",
-    "TRICHOLOGICAL MICROSCOPE DIAGNOSTICS",
-    "BIO-LIPID BOTANICAL FORMULATIONS",
-    "NO HURRIED CHAIR ROTATIONS",
-    "BY APPOINTMENT ONLY"
-  ];
-
+export default function ConfidenceTicker({ content }) {
+  if (!Array.isArray(content?.statements) || !content.statements.length)
+    return null;
+  // Static text respects reduced motion and avoids a permanently active render layer.
   return (
-    <aside className="confidence-ticker hairline-b" aria-label="Atelier Philosophy Principles">
-      <div className="ticker-track">
-        <div className="ticker-content" aria-hidden="true">
-          {statements.concat(statements).map((text, idx) => (
-            <span key={idx} className="ticker-item">
-              <span className="ticker-bullet">/</span>
-              <span className="ticker-text">{text}</span>
-            </span>
-          ))}
-        </div>
+    <aside
+      className="confidence-ticker hairline-b"
+      aria-label="Atelier principles"
+    >
+      <div className="principles-list">
+        {content.statements.map((statement, index) => (
+          <span key={index} className="ticker-item">
+            <span aria-hidden="true">/</span> {statement}
+          </span>
+        ))}
       </div>
     </aside>
   );

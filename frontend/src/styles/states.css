@@ -1,0 +1,277 @@
+/* Shared interaction states, compact layouts, and accessible production feedback. */
+.catalog-state {
+  padding: clamp(28px, 5vw, 72px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+}
+.media-unavailable {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: var(--muted);
+  background: var(--paper-dim);
+  font: 14px var(--font-sans);
+  text-align: center;
+}
+.catalog-heading {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 36px;
+  font-size: clamp(28px, 5vw, 42px);
+}
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 3000;
+  padding: 12px 20px;
+  background: var(--ink);
+  color: var(--paper);
+  transform: translateY(-180%);
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+section[id],
+main[id] {
+  scroll-margin-top: 100px;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+button:disabled:active {
+  transform: none;
+}
+input,
+textarea,
+select {
+  max-width: 100%;
+}
+textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+dd,
+figure,
+blockquote {
+  margin: 0;
+}
+dl {
+  margin: 0;
+}
+.nav-container {
+  gap: 24px;
+}
+.brand-wrapper {
+  position: static;
+  transform: none;
+  order: 0;
+  flex-shrink: 0;
+}
+.nav-links {
+  order: 1;
+  gap: 18px;
+  margin-left: auto;
+}
+.nav-actions {
+  order: 2;
+  gap: 12px;
+}
+.nav-account-btn {
+  min-height: 44px;
+  padding: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.location-btn {
+  border: 0;
+  background: transparent;
+  max-width: 210px;
+  min-height: 32px;
+}
+.hero-grid:not(:has(.hero-media-col)),
+.story-grid:not(:has(.story-media-col)) {
+  grid-template-columns: 1fr;
+}
+.hero-grid:not(:has(.hero-media-col)) .hero-copy-col {
+  max-width: 1000px;
+}
+.principles-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  justify-content: center;
+  padding: 16px 24px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+.tab-btn {
+  transition: none;
+}
+.dark-shell :focus-visible {
+  outline-color: var(--paper);
+}
+.tab-btn .tab-title {
+  overflow-wrap: anywhere;
+}
+.timeline-steps {
+  list-style: none;
+  padding: 0;
+}
+.option-card:focus-within {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.option-card,
+.date-pill-btn,
+.time-slot-btn {
+  min-height: 48px;
+}
+.checkbox-label {
+  min-height: 44px;
+  align-items: center;
+}
+.checkbox-label input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+.booking-error-banner {
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  padding: 12px 16px;
+  margin: 12px 0;
+  overflow-wrap: anywhere;
+}
+.ticket-row {
+  flex-wrap: wrap;
+}
+.ticket-val {
+  margin: 0;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.review-row {
+  gap: 16px;
+}
+.review-row dd {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.conf-actions-row {
+  flex-wrap: wrap;
+}
+.management-form,
+.management-result {
+  margin-top: 24px;
+}
+.management-result .ticket-card {
+  width: 100%;
+}
+.legal-body {
+  white-space: pre-wrap;
+  display: grid;
+  gap: 20px;
+}
+.modal-close-btn,
+.drawer-close-btn,
+.mobile-menu-toggle {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.modal-heading {
+  overflow-wrap: anywhere;
+}
+.modal-backdrop {
+  overscroll-behavior: contain;
+}
+.mobile-drawer-overlay {
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: max(36px, env(safe-area-inset-bottom));
+}
+.modal-foot-bar {
+  padding-bottom: max(18px, env(safe-area-inset-bottom));
+}
+html[data-input="keyboard"] .modal-backdrop,
+html[data-input="keyboard"] .booking-modal-sheet,
+html[data-input="keyboard"] .mobile-drawer-overlay {
+  animation: none;
+  transition: none;
+}
+@media (max-width: 1180px) {
+  .nav-links {
+    display: none;
+  }
+  .mobile-menu-toggle {
+    display: inline-flex;
+  }
+  .brand-wrapper {
+    margin-right: auto;
+  }
+}
+@media (max-width: 640px) {
+  .nav-container {
+    padding: 12px 16px;
+    gap: 12px;
+  }
+  .nav-actions {
+    gap: 6px;
+  }
+  .modal-top-bar {
+    gap: 12px;
+  }
+  .modal-heading {
+    max-width: 200px;
+  }
+  .ticket-lbl {
+    flex-shrink: 1;
+  }
+  .ticket-val {
+    text-align: left;
+  }
+  .ticket-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .review-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .review-row dd {
+    text-align: left;
+  }
+  .conf-actions-row > button {
+    width: 100%;
+  }
+  .catalog-heading {
+    padding: 24px 20px;
+  }
+}
+@media (max-width: 480px) {
+  .nav-book-btn {
+    display: none;
+  }
+}
+@media (hover: none), (pointer: coarse) {
+  .hero-portrait-frame:hover .hero-portrait-img,
+  .stack-card:hover .story-img,
+  .brand-mark:hover,
+  .timeline-step-row:hover,
+  .mobile-nav-link:hover {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,5 +1,5 @@
 :root {
-  /* Warm Architectural Paper & Stone Palette */
+  /* Page surfaces and text */
   --paper: #f7f4ee;
   --paper-card: #fcfbf8;
   --paper-dim: #ede6dc;
@@ -7,25 +7,25 @@
   --ink-secondary: #2f2b25;
   --muted: #6b645b;
   --muted-light: #948c82;
-  --line: rgba(20, 19, 17, 0.10);
+  --line: rgba(20, 19, 17, 0.1);
   --line-strong: rgba(20, 19, 17, 0.22);
   --line-subtle: rgba(20, 19, 17, 0.05);
 
-  /* Redband Signature Crimson Lacquer */
+  /* Accent colors */
   --accent: #9e261f;
   --accent-hover: #831d17;
   --accent-soft: rgba(158, 38, 31, 0.08);
   --accent-border: rgba(158, 38, 31, 0.22);
   --accent-glow: rgba(158, 38, 31, 0.28);
 
-  /* Midnight Obsidian Atmosphere */
+  /* Dark sections */
   --chapter-dark: #12110f;
   --chapter-dark-surface: #1a1917;
   --chapter-dark-card: #201e1b;
   --chapter-dark-line: rgba(247, 244, 238, 0.12);
   --chapter-dark-muted: #9c968c;
 
-  /* Refined Translucency & Glassmorphism */
+  /* Translucent surfaces */
   --glass-nav: rgba(247, 244, 238, 0.84);
   --glass-surface: rgba(255, 255, 255, 0.65);
   --glass-card: rgba(252, 251, 248, 0.85);
@@ -41,23 +41,32 @@
 
   /* Shadows */
   --shadow-sm: 0 1px 3px rgba(20, 19, 17, 0.04);
-  --shadow-md: 0 8px 24px -4px rgba(20, 19, 17, 0.06), 0 2px 6px -1px rgba(20, 19, 17, 0.04);
+  --shadow-md:
+    0 8px 24px -4px rgba(20, 19, 17, 0.06),
+    0 2px 6px -1px rgba(20, 19, 17, 0.04);
   --shadow-lg: 0 20px 48px -12px rgba(20, 19, 17, 0.08);
-  --shadow-glass: 0 12px 36px 0 rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.65);
-  --shadow-modal: 0 32px 80px -16px rgba(0, 0, 0, 0.42), 0 1px 0 rgba(255, 255, 255, 0.15) inset;
+  --shadow-glass:
+    0 12px 36px 0 rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  --shadow-modal:
+    0 32px 80px -16px rgba(0, 0, 0, 0.42),
+    0 1px 0 rgba(255, 255, 255, 0.15) inset;
 
   /* Typography */
   --font-serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
-  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans:
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
   --font-mono: "Space Grotesk", monospace;
 
-  /* Physics & Motion Curves */
+  /* Animation curves */
   --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-snappy: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -79,7 +88,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-serif);
   font-weight: 400;
   margin: 0;
@@ -150,11 +164,6 @@ button {
   gap: 8px;
 }
 
-.eyebrow-accent {
-  color: var(--accent);
-  font-weight: 600;
-}
-
 .badge-tag {
   display: inline-flex;
   align-items: center;
@@ -173,7 +182,7 @@ button {
   color: var(--ink-secondary);
 }
 
-/* Primary actions with tactile haptics */
+/* Primary actions */
 .btn-ink {
   display: inline-flex;
   align-items: center;
@@ -190,7 +199,11 @@ button {
   border: 1px solid var(--ink);
   border-radius: 3px;
   box-shadow: 0 2px 6px rgba(20, 19, 17, 0.12);
-  transition: transform 140ms var(--ease-snappy), background-color 200ms var(--ease-snappy), border-color 200ms var(--ease-snappy), box-shadow 200ms var(--ease-snappy);
+  transition:
+    transform 140ms var(--ease-snappy),
+    background-color 200ms var(--ease-snappy),
+    border-color 200ms var(--ease-snappy),
+    box-shadow 200ms var(--ease-snappy);
 }
 
 .btn-ink:hover {
@@ -220,7 +233,11 @@ button {
   font-weight: 500;
   border: 1px solid var(--line-strong);
   border-radius: 3px;
-  transition: transform 140ms var(--ease-snappy), border-color 200ms ease, color 200ms ease, background-color 200ms ease;
+  transition:
+    transform 140ms var(--ease-snappy),
+    border-color 200ms ease,
+    color 200ms ease,
+    background-color 200ms ease;
 }
 
 .btn-outline:hover {
@@ -235,7 +252,9 @@ button {
 
 /* Reduced motion overrides */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;

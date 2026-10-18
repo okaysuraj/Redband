@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// Compose the published studio page and open account-scoped reservation dialogs.
+import React, { useCallback, useState } from "react";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import ConfidenceTicker from "./components/ConfidenceTicker";
@@ -8,103 +9,170 @@ import SignatureFavorites from "./components/SignatureFavorites";
 import StudioLocations from "./components/StudioLocations";
 import Footer from "./components/Footer";
 import BookingModal from "./components/BookingModal";
+import BookingManager from "./components/BookingManager";
+import { AuthProvider, AuthPanel } from "./auth/index.jsx";
+import { useAuth } from "./auth/context.js";
+import useCatalog from "./hooks/useCatalog";
+import useInputModality from "./hooks/useInputModality";
 import "./App.css";
 
-export default function App() {
-  const [activeLocation, setActiveLocation] = useState("noho-nyc");
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [bookingPreselect, setBookingPreselect] = useState({
-    treatmentId: null,
-    locationId: null,
-    addon: null,
-  });
-
-  const handleOpenBooking = (options = {}) => {
-    setBookingPreselect({
-      treatmentId: options.treatmentId || null,
-      locationId: options.locationId || activeLocation,
-      addon: options.addon || null,
-    });
-    setIsBookingOpen(true);
+function AppContent() {
+  const auth = useAuth();
+  const [selectedLocation, setActiveLocation] = useState("");
+  const [booking, setBooking] = useState(null);
+  const [managingBooking, setManagingBooking] = useState(false);
+  const { catalog, status, error, retry } = useCatalog();
+  useInputModality();
+  const { treatments, locations, favorites, practitioners, sections } = catalog;
+  const activeLocation = locations.some((item) => item.id === selectedLocation)
+    ? selectedLocation
+    : locations[0]?.id || "";
+  const bookingAvailable =
+    status === "ready" &&
+    Boolean(treatments.length && locations.length && practitioners.length);
+  const openBooking = (options = {}) => {
+    if (!auth.user) {
+      auth.openAuth();
+      return;
+    }
+    if (bookingAvailable)
+      setBooking({
+        treatmentId: options.treatmentId || null,
+        locationId: options.locationId || activeLocation,
+        addon: options.addon || "",
+      });
   };
-
-  const handleCloseBooking = () => {
-    setIsBookingOpen(false);
+  const openManager = () => {
+    if (!auth.user) {
+      auth.openAuth();
+      return;
+    }
+    setManagingBooking(true);
   };
-
-  const handleSelectTreatmentForBooking = (treatmentId) => {
-    handleOpenBooking({ treatmentId, locationId: activeLocation });
-  };
-
-  const handleSelectLocationForBooking = (locationId) => {
-    setActiveLocation(locationId);
-    handleOpenBooking({ locationId });
-  };
-
-  const handleOpenBookingWithAddon = (addon) => {
-    handleOpenBooking({ addon, locationId: activeLocation });
-  };
-
+  const closeBooking = useCallback(() => setBooking(null), []);
+  const closeManager = useCallback(() => setManagingBooking(false), []);
   return (
-    <div className="app-root">
-      {/* Top Banner Notice */}
-      <div className="top-announcement hairline-b">
-        <div className="editorial-shell announcement-shell">
-          <div className="announcement-content">
-            <span className="announcement-badge">Note</span>
-            <span className="announcement-text desktop-text">
-              Fall / Winter 2026 Reservation Calendar Open · Private Acoustic Suites · Strictly One Guest Per Session
-            </span>
-            <span className="announcement-text mobile-text">
-              Fall / Winter 2026 Suites Open
-            </span>
-            <button
-              type="button"
-              className="announcement-cta"
-              onClick={() => handleOpenBooking()}
-            >
-              Reserve Early Slots ↗
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation */}
+    <div className="app-root" id="top">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <Navbar
+        locations={locations}
+        brand={sections.brand}
         activeLocation={activeLocation}
         setActiveLocation={setActiveLocation}
-        onOpenBooking={() => handleOpenBooking()}
+        onOpenBooking={() => openBooking()}
+        bookingAvailable={bookingAvailable && !auth.loading}
+        onManageBooking={openManager}
+        auth={auth}
+        hasStory={Boolean(sections.story)}
       />
-
-      {/* Main Content Sections */}
-      <main id="main-content">
-        <Hero onOpenBooking={() => handleOpenBooking()} />
-        <ConfidenceTicker />
-        <AtelierStory />
-        <TreatmentSelector
-          onSelectTreatmentForBooking={handleSelectTreatmentForBooking}
-        />
-        <SignatureFavorites
-          onOpenBookingWithAddon={handleOpenBookingWithAddon}
-        />
-        <StudioLocations
-          activeLocation={activeLocation}
-          setActiveLocation={setActiveLocation}
-          onSelectLocationForBooking={handleSelectLocationForBooking}
-        />
+      <main id="main-content" tabIndex={-1}>
+        {status === "loading" && (
+          <div className="catalog-state" role="status">
+            <span className="checking-spinner" aria-hidden="true" /> Loading
+            studio information...
+          </div>
+        )}
+        {status === "error" && (
+          <div className="catalog-state" role="alert">
+            <h1>Studio information is unavailable</h1>
+            <p>{error}</p>
+            <button className="btn-ink" onClick={retry}>
+              Try again
+            </button>
+          </div>
+        )}
+        {status === "ready" && (
+          <>
+            {!sections.hero?.title && (
+              <h1 className="catalog-heading">Redband reservations</h1>
+            )}
+            <Hero
+              content={sections.hero}
+              onOpenBooking={() => openBooking()}
+              bookingAvailable={bookingAvailable}
+            />
+            <ConfidenceTicker content={sections.ticker} />
+            <AtelierStory content={sections.story} />
+            <TreatmentSelector
+              content={sections.treatments}
+              treatments={treatments}
+              onSelectTreatmentForBooking={(treatmentId) =>
+                openBooking({ treatmentId })
+              }
+              bookingAvailable={bookingAvailable}
+            />
+            <SignatureFavorites
+              content={sections.favorites}
+              favorites={favorites}
+              onOpenBookingWithAddon={(addon) => openBooking({ addon })}
+              bookingAvailable={bookingAvailable}
+            />
+            <StudioLocations
+              content={sections.studios}
+              locations={locations}
+              activeLocation={activeLocation}
+              setActiveLocation={setActiveLocation}
+              onSelectLocationForBooking={(locationId) =>
+                openBooking({ locationId })
+              }
+              bookingAvailable={bookingAvailable}
+            />
+            {!treatments.length && !locations.length && (
+              <div className="catalog-state" role="status">
+                <h2>Reservations are not available yet</h2>
+                <p>
+                  Studio services and locations have not been published. Please
+                  check back later.
+                </p>
+              </div>
+            )}
+          </>
+        )}
       </main>
-
-      {/* Footer */}
-      <Footer onOpenBooking={() => handleOpenBooking()} />
-
-      {/* Accessible 5-Step Guided Booking Modal */}
-      <BookingModal
-        isOpen={isBookingOpen}
-        onClose={handleCloseBooking}
-        initialTreatmentId={bookingPreselect.treatmentId}
-        initialLocationId={bookingPreselect.locationId}
-        initialAddon={bookingPreselect.addon}
+      <Footer
+        brand={sections.brand}
+        content={sections.footer}
+        legal={sections.legal}
+        treatments={treatments}
+        locations={locations}
+        favorites={favorites}
+        onOpenBooking={() => openBooking()}
+        bookingAvailable={bookingAvailable}
+        onManageBooking={openManager}
       />
+      {booking && auth.user && (
+        <BookingModal
+          key={auth.user.uid}
+          onClose={closeBooking}
+          initialTreatmentId={booking.treatmentId}
+          initialLocationId={booking.locationId}
+          initialAddon={booking.addon}
+          treatments={treatments}
+          locations={locations}
+          practitioners={practitioners}
+          favorites={favorites}
+        />
+      )}
+      {managingBooking && auth.user && (
+        <BookingManager
+          key={auth.user.uid}
+          onClose={closeManager}
+          treatments={treatments}
+          locations={locations}
+          practitioners={practitioners}
+        />
+      )}
+      <AuthPanel />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

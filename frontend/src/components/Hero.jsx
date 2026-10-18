@@ -1,86 +1,92 @@
+// Render the published introduction and reservation entry point.
 import React from "react";
-
-export default function Hero({ onOpenBooking }) {
+import { mediaUrl } from "../api/client";
+import PublishedImage from "./PublishedImage";
+export default function Hero({ content, onOpenBooking, bookingAvailable }) {
+  if (!content) return null;
+  const image = mediaUrl(content.image_url);
   return (
-    <section className="hero-section hairline-b" id="top" aria-label="Introduction">
+    <section className="hero-section hairline-b" aria-label="Introduction">
       <div className="editorial-shell hero-grid">
         <div className="hero-copy-col">
           <div className="hero-eyebrow-row">
-            <span className="eyebrow">
-              <span className="eyebrow-accent">●</span> Atelier No. 312 · Established 2021
-            </span>
-            <span className="badge-tag">By Appointment Only</span>
+            {content.eyebrow && (
+              <span className="eyebrow">{content.eyebrow}</span>
+            )}
+            {content.badge && (
+              <span className="badge-tag">{content.badge}</span>
+            )}
           </div>
-
-          <div className="hero-title-wrap">
+          {content.title ? (
             <h1 className="hero-heading">
-              Cut with clarity.
-              <em className="hero-heading-italic"> Restored with discipline.</em>
+              {content.title}
+              {content.subtitle && (
+                <em className="hero-heading-italic"> {content.subtitle}</em>
+              )}
             </h1>
-          </div>
-
+          ) : (
+            content.subtitle && (
+              <p className="hero-heading">{content.subtitle}</p>
+            )
+          )}
           <div className="hero-foot-wrap">
-            <p className="hero-lead">
-              A private restorative hair clinic and bespoke cutting room. We diagnose head shape, 
-              follicle density, and texture before touching shears—infusing cold-pressed botanical 
-              elixirs in single-chair acoustic silence.
-            </p>
-
+            {content.description && (
+              <p className="hero-lead">{content.description}</p>
+            )}
             <div className="hero-actions-row">
               <button
-                type="button"
                 className="btn-ink hero-cta-btn"
-                onClick={() => onOpenBooking()}
+                disabled={!bookingAvailable}
+                onClick={onOpenBooking}
               >
-                <span>Reserve Consultation</span>
-                <span aria-hidden="true">→</span>
+                Reserve a Chair <span aria-hidden="true">&rarr;</span>
               </button>
-
               <a
-                href="#treatments"
                 className="circle-scroll-btn"
-                aria-label="Scroll down to explore treatments"
+                href="#treatments"
+                aria-label="Explore treatments"
               >
-                <span className="circle-arrow" aria-hidden="true">↓</span>
+                &darr;
               </a>
             </div>
-
-            <div className="hero-meta-strip">
-              <div className="meta-item">
-                <span className="meta-label">Chairs</span>
-                <span className="meta-val">1 Guest / Suite</span>
+            {Array.isArray(content.stats) && (
+              <div className="hero-meta-strip">
+                {content.stats.map((stat, index) => (
+                  <div className="meta-item" key={index}>
+                    <span className="meta-label">{stat.label}</span>
+                    <span className="meta-val">{stat.value}</span>
+                  </div>
+                ))}
               </div>
-              <div className="meta-divider"></div>
-              <div className="meta-item">
-                <span className="meta-label">Formulations</span>
-                <span className="meta-val">100% Bio-Lipid</span>
-              </div>
-              <div className="meta-divider"></div>
-              <div className="meta-item">
-                <span className="meta-label">Pace</span>
-                <span className="meta-val">Unhurried (55–115 min)</span>
-              </div>
-            </div>
+            )}
+            {!image && content.location_caption && (
+              <p className="hero-lead">{content.location_caption}</p>
+            )}
           </div>
         </div>
-
-        <div className="hero-media-col hairline-l">
-          <div className="hero-portrait-frame">
-            <img
-              src="/images/hero-portrait.jpg"
-              alt="Documentary portrait of client seated quietly in warm minimalist studio"
-              className="hero-portrait-img"
-              loading="eager"
-            />
-            <div className="portrait-overlay-tag">
-              <span className="portrait-tag-dot"></span>
-              <span className="portrait-tag-text">Quiet Craft · Portrait Study No. 04</span>
-            </div>
-            <div className="portrait-location-tag">
-              <span>NoHo Suite · Studio Window East</span>
+        {image && (
+          <div className="hero-media-col hairline-l">
+            <div className="hero-portrait-frame">
+              <PublishedImage
+                src={image}
+                alt={content.image_alt || ""}
+                className="hero-portrait-img"
+                fetchPriority="high"
+                decoding="async"
+              />
+              {content.image_caption && (
+                <div className="portrait-overlay-tag">
+                  {content.image_caption}
+                </div>
+              )}
+              {content.location_caption && (
+                <div className="portrait-location-tag">
+                  {content.location_caption}
+                </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

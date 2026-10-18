@@ -1,90 +1,102 @@
+// Display studio details and keep location selection in the page.
 import React from "react";
-import { LOCATIONS } from "../data/bookingData";
-
-export default function StudioLocations({ activeLocation, setActiveLocation, onSelectLocationForBooking }) {
+export default function StudioLocations({
+  content,
+  locations = [],
+  activeLocation,
+  setActiveLocation,
+  onSelectLocationForBooking,
+  bookingAvailable,
+}) {
   return (
-    <section className="locations-section hairline-b" id="locations" aria-labelledby="locations-title">
+    <section
+      className="locations-section hairline-b"
+      id="locations"
+      aria-labelledby="locations-title"
+    >
       <div className="editorial-shell">
         <div className="locations-header">
-          <span className="eyebrow">
-            <span className="eyebrow-accent">04</span> Studio Locations & Hours
-          </span>
+          <span className="eyebrow">Studio locations and hours</span>
           <h2 id="locations-title" className="locations-heading">
-            Two quiet sanctuaries.
+            {content?.title || "Studio locations"}
           </h2>
-          <p className="locations-lead">
-            Both studios are built with private single-chair acoustic rooms, natural north/east daylight, 
-            and step-free street or elevator access.
-          </p>
+          {content?.description && (
+            <p className="locations-lead">{content.description}</p>
+          )}
         </div>
-
+        {!locations.length && (
+          <p className="catalog-state">
+            No studio locations have been published yet.
+          </p>
+        )}
         <div className="locations-grid hairline-t">
-          {LOCATIONS.map((loc, idx) => {
-            const isSelected = activeLocation === loc.id;
-            return (
-              <div
-                key={loc.id}
-                className={`location-card ${idx > 0 ? "hairline-l" : ""} ${isSelected ? "is-active-location" : ""}`}
-              >
-                <div className="loc-card-top">
-                  <div className="loc-city-wrap">
-                    <span className="loc-neighborhood">{loc.neighborhood}</span>
-                    <h3 className="loc-city-name">{loc.city} Atelier</h3>
-                  </div>
-                  <div className="loc-status-stack">
-                    {isSelected && (
-                      <span className="loc-current-badge">
-                        <span className="current-dot" aria-hidden="true">●</span> Active Selection
-                      </span>
-                    )}
-                    <span className="loc-status-pill">
-                      <span className="status-dot"></span>
-                      {loc.status}
-                    </span>
-                  </div>
+          {locations.map((location, index) => (
+            <article
+              key={location.id}
+              className={`location-card ${index ? "hairline-l" : ""} ${activeLocation === location.id ? "is-active-location" : ""}`}
+            >
+              <div className="loc-card-top">
+                <div className="loc-city-wrap">
+                  <span className="loc-neighborhood">
+                    {location.neighborhood}
+                  </span>
+                  <h3 className="loc-city-name">{location.city}</h3>
                 </div>
-
-                <div className="loc-card-body">
-                  <div className="loc-info-row">
-                    <span className="info-label">Address</span>
-                    <p className="info-value address-val">{loc.address}</p>
-                    <span className="info-sub">{loc.transit}</span>
-                  </div>
-
-                  <div className="loc-info-row">
-                    <span className="info-label">Operating Schedule</span>
-                    <p className="info-value">{loc.hours}</p>
-                  </div>
-
-                  <div className="loc-info-row">
-                    <span className="info-label">Accessibility</span>
-                    <p className="info-value">{loc.accessibility}</p>
-                  </div>
-
-                  <div className="loc-info-row">
-                    <span className="info-label">Direct Line</span>
-                    <a href={`tel:${loc.phone.replace(/[^0-9+]/g, '')}`} className="loc-phone-link">
-                      {loc.phone}
-                    </a>
-                  </div>
-                </div>
-
-                <div className="loc-card-foot hairline-t">
-                  <button
-                    type="button"
-                    className={`btn-ink loc-book-btn ${isSelected ? "is-selected-btn" : ""}`}
-                    onClick={() => {
-                      setActiveLocation(loc.id);
-                      onSelectLocationForBooking(loc.id);
-                    }}
-                  >
-                    <span>Reserve in {loc.city}</span>
-                    <span aria-hidden="true">→</span>
-                  </button>
+                <div className="loc-status-stack">
+                  {activeLocation === location.id && (
+                    <span className="loc-current-badge">Selected studio</span>
+                  )}
+                  {location.status && (
+                    <span className="loc-status-pill">{location.status}</span>
+                  )}
                 </div>
               </div>
-            );
-          })}
+              <div className="loc-card-body">
+                <div className="loc-info-row">
+                  <span className="info-label">Address</span>
+                  <p className="info-value">{location.address}</p>
+                  <span className="info-sub">{location.transit}</span>
+                </div>
+                <div className="loc-info-row">
+                  <span className="info-label">Opening hours</span>
+                  <p className="info-value">{location.hours}</p>
+                  {location.timezone && (
+                    <span className="info-sub">{location.timezone}</span>
+                  )}
+                </div>
+                {location.accessibility && (
+                  <div className="loc-info-row">
+                    <span className="info-label">Accessibility</span>
+                    <p className="info-value">{location.accessibility}</p>
+                  </div>
+                )}
+                {location.phone && (
+                  <div className="loc-info-row">
+                    <span className="info-label">Telephone</span>
+                    <a
+                      href={`tel:${location.phone.replace(/[^0-9+]/g, "")}`}
+                      className="loc-phone-link"
+                    >
+                      {location.phone}
+                    </a>
+                  </div>
+                )}
+              </div>
+              <div className="loc-card-foot hairline-t">
+                <button
+                  className="btn-ink loc-book-btn"
+                  disabled={!bookingAvailable}
+                  onClick={() => {
+                    setActiveLocation(location.id);
+                    onSelectLocationForBooking(location.id);
+                  }}
+                >
+                  Reserve in {location.city}{" "}
+                  <span aria-hidden="true">&rarr;</span>
+                </button>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </section>

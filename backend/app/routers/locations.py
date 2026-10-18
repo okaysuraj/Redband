@@ -2,6 +2,7 @@
 GET /api/locations — list all studio locations
 GET /api/locations/{location_id} — single location detail
 """
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,13 +16,17 @@ router = APIRouter(prefix="/api/locations", tags=["Locations"])
 
 @router.get("", response_model=list[LocationOut])
 async def list_locations(db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Location))
+    result = await db.execute(
+        select(Location).where(Location.active.is_(True)).order_by(Location.id)
+    )
     return result.scalars().all()
 
 
 @router.get("/{location_id}", response_model=LocationOut)
 async def get_location(location_id: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Location).where(Location.id == location_id))
+    result = await db.execute(
+        select(Location).where(Location.id == location_id, Location.active.is_(True))
+    )
     location = result.scalar_one_or_none()
     if not location:
         raise HTTPException(status_code=404, detail="Location not found")

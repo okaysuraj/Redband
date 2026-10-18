@@ -2,6 +2,7 @@
 GET /api/practitioners — list all practitioners
 GET /api/practitioners/{practitioner_id} — single practitioner detail
 """
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,7 +30,10 @@ def _practitioner_to_out(p: Practitioner) -> PractitionerOut:
 @router.get("", response_model=list[PractitionerOut])
 async def list_practitioners(db: AsyncSession = Depends(get_db)):
     result = await db.execute(
-        select(Practitioner).options(selectinload(Practitioner.available_days))
+        select(Practitioner)
+        .where(Practitioner.active.is_(True))
+        .options(selectinload(Practitioner.available_days))
+        .order_by(Practitioner.id)
     )
     practitioners = result.scalars().all()
     return [_practitioner_to_out(p) for p in practitioners]
@@ -39,7 +43,7 @@ async def list_practitioners(db: AsyncSession = Depends(get_db)):
 async def get_practitioner(practitioner_id: str, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Practitioner)
-        .where(Practitioner.id == practitioner_id)
+        .where(Practitioner.id == practitioner_id, Practitioner.active.is_(True))
         .options(selectinload(Practitioner.available_days))
     )
     practitioner = result.scalar_one_or_none()

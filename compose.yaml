@@ -1,0 +1,20 @@
+# Local PostgreSQL only; run the backend and frontend on the host.
+services:
+  database:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: redband
+      POSTGRES_DB: redband
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-redband}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U redband -d redband"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+volumes:
+  postgres_data:

@@ -2,6 +2,7 @@
 GET /api/treatments — list all treatments
 GET /api/treatments/{treatment_id} — single treatment detail
 """
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,6 +30,9 @@ def _treatment_to_out(t: Treatment) -> TreatmentOut:
         image_alt=t.image_alt,
         formulations=[f.name for f in t.formulations],
         steps=[s.description for s in sorted(t.steps, key=lambda s: s.order)],
+        duration_minutes=t.duration_minutes,
+        price_minor=t.price_minor,
+        currency=t.currency,
     )
 
 
@@ -36,6 +40,7 @@ def _treatment_to_out(t: Treatment) -> TreatmentOut:
 async def list_treatments(db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Treatment)
+        .where(Treatment.active.is_(True))
         .options(selectinload(Treatment.formulations), selectinload(Treatment.steps))
         .order_by(Treatment.index)
     )
@@ -47,7 +52,7 @@ async def list_treatments(db: AsyncSession = Depends(get_db)):
 async def get_treatment(treatment_id: str, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Treatment)
-        .where(Treatment.id == treatment_id)
+        .where(Treatment.id == treatment_id, Treatment.active.is_(True))
         .options(selectinload(Treatment.formulations), selectinload(Treatment.steps))
     )
     treatment = result.scalar_one_or_none()
